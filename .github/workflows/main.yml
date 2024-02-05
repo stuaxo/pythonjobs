@@ -1,0 +1,50 @@
+name: Python and Node.js CI
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Set up Node.js 20.x
+      uses: actions/setup-node@v3
+      with:
+        node-version: '20.x'
+
+    - uses: actions/checkout@v3
+
+    - name: Set up Python 3.12.1
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.12.1'
+
+    - name: Clone template repository
+      run: git clone --depth 1 https://github.com/pythonjobs/template.git ../template
+
+    - name: Install Python dependencies
+      run: pip install -U pip && pip install pyyaml==6.0.1 -r ../template/requirements.txt
+
+    - name: Install Node.js dependencies (if any)
+      run: npm install
+
+    - name: Run Python script
+      run: ../template/build.py .
+
+    - name: Preview or Deploy
+      if: github.event_name == 'pull_request' || (github.ref == 'refs/heads/master' && github.event_name == 'push')
+      run: |
+        if [ "${{ github.event_name }}" == "pull_request" ]; then
+          ../template/preview.py
+        else
+          ../template/deploy.py
+        fi
+
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      CUSTOM_SECRET: ${{ secrets.CUSTOM_SECRET }}

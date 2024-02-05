@@ -2,7 +2,7 @@
 # Licensed under the MIT license
 
 # Base image
-FROM python:2.7-stretch
+FROM python:3.11-bullseye
 
 # Start off with the most updated image possible
 RUN apt-get update && apt-get --yes dist-upgrade
